@@ -9,17 +9,27 @@ def binaryToDecimal(integer):
     return zeroes_to_add * "0" + output
 
 
+def cleanFile(file):
+    lines = file.readlines()
+    lines_no_whitespace = [line.strip() for line in lines]
+    lines_no_comments = [line for line in lines_no_whitespace if line[0] != "/"]
+    return lines_no_comments
+
+
 def readASMFile(file_name):
-    line_number = 0
     with open(f"./test_files/{file_name}") as file:
-        parseLabels(file)
-        parseVariables(file)
-        parseInstructions(file)
+        file_cleaned = cleanFile(file)
+        parseLabels(file_cleaned)
+        parseVariables(file_cleaned)
+        parseInstructions(file_cleaned)
     return
 
 
 def parseLabels(file):
     # fill symbols with labels and the appropriate line number
+    line_number = 0
+    for line in file:
+        if
     return
 
 
