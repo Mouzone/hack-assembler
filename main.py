@@ -1,5 +1,5 @@
-# prompt and search test_files for the file name
-def binaryToDecimal(integer):
+# returns 16 bit binary
+def decimalToBinary(integer):
     output = ""
     while integer > 0:
         output = integer % 2 + output
@@ -12,37 +12,62 @@ def binaryToDecimal(integer):
 def cleanFile(file):
     lines = file.readlines()
     lines_no_whitespace = [line.strip() for line in lines]
-    lines_no_comments = [line for line in lines_no_whitespace if line[0] != "/"]
+    lines_no_comments = [line for line in lines_no_whitespace if line[0] != "/" or line]
     return lines_no_comments
 
 
 def readASMFile(file_name):
     with open(f"./test_files/{file_name}") as file:
         file_cleaned = cleanFile(file)
-        parseLabels(file_cleaned)
-        parseVariables(file_cleaned)
-        parseInstructions(file_cleaned)
+        file_no_labels = parseLabels(file_cleaned)
+        parseVariables(file_no_labels)
+        parseFile(file_no_labels)
     return
 
 
 def parseLabels(file):
-    # fill symbols with labels and the appropriate line number
     line_number = 0
     for line in file:
-        if
-    return
+        if line[0] == "(":
+            label = line[1:-1]
+            symbols[label] = line_number + 1
+        line_number += 1
+
+    lines_no_labels = [line for line in file if line[0] != "("]
+    return lines_no_labels
 
 
 def parseVariables(file):
-    # fill symbols with variables and the appropriate register number
     # starts at 16
-    return
+    register = 16
+    for line in file:
+        if line[0] == "@" and line[1:] not in symbols.keys():
+            symbols[line[1:]] = register
+            register += 1
 
 
-def parseInstructions(file):
+def parseFile(file):
     # write to output file
+    # starts with @ write it as a_instruction "0 +..."
+    # else write is as c_instruction "111 + a + cccccc + ddd + jjj
+    for line in file:
+        if line[0] == "@":
+            parseAInstruction(line)
+        else:
+            parseCInstruction(line)
     return
 
+# a_instruction "..."
+def parseAInstruction(line):
+    symbol = line[1:]
+    value = symbols[symbol]
+    output = decimalToBinary(value)
+    return output
+
+# c_instruction "111 + a + cccccc + ddd + jjj
+def parseCInstruction(line):
+    output = "111"
+    
 
 symbols = {"R0": 0,
            "R1": 1,
