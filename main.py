@@ -1,3 +1,5 @@
+import re
+
 # returns 16 bit binary
 def decimalToBinary(integer):
     output = ""
@@ -18,10 +20,10 @@ def cleanFile(file):
 
 def readASMFile(file_name):
     with open(f"./test_files/{file_name}") as file:
-        file_cleaned = cleanFile(file)
-        file_no_labels = parseLabels(file_cleaned)
-        parseVariables(file_no_labels)
-        parseFile(file_no_labels)
+        file_cleaned = cleanFile(file)  # remove whitespace and comments
+        file_no_labels = parseLabels(file_cleaned)  # remove and parse labels
+        parseVariables(file_no_labels)  # parse variables
+        parseFile(file_no_labels)  # parse entirety of file
     return
 
 
@@ -57,17 +59,61 @@ def parseFile(file):
             parseCInstruction(line)
     return
 
-# a_instruction "..."
+
 def parseAInstruction(line):
     symbol = line[1:]
     value = symbols[symbol]
     output = decimalToBinary(value)
     return output
 
+
 # c_instruction "111 + a + cccccc + ddd + jjj
 def parseCInstruction(line):
     output = "111"
-    
+    result = re.split(r'[=;]', line)
+    a_comp = parseAandComp(result[0].strip())
+    dest = parseDest(result[1].strip())
+    jump = parseJump(result[2].strip())
+
+    return output + a_comp + dest + jump
+
+
+def parseAandComp(comp):
+    output = ""
+    if "M" in comp:
+        output += 1
+    else:
+        output += 0
+        
+    return output
+
+
+def parseDest(dest):
+    output = ""
+
+    output += ("A" in dest)
+    output += ("D" in dest)
+    output += ("M" in dest)
+
+    return output
+
+def parseJump(jump):
+    if jump == "JMP":
+        return "111"
+    elif jump == "JGT":
+        return "001"
+    elif jump == "JEQ":
+        return "010"
+    elif jump == "JGE":
+        return "010"
+    elif jump == "JLT":
+        return "100"
+    elif jump == "JNE":
+        return "101"
+    elif jump == "JLE":
+        return "110"
+    else:
+        return "000"
 
 symbols = {"R0": 0,
            "R1": 1,
