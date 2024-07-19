@@ -82,10 +82,47 @@ def parseAandComp(comp):
     output = ""
     if "M" in comp:
         output += 1
+        comp_letter = "M"
     else:
         output += 0
-        
-    return output
+        comp_letter = "A"
+
+    if comp == "0":
+        return output + "101010"
+    elif comp == "1":
+        return output + "111111"
+    elif comp == "-1":
+        return output + "111010"
+    elif comp == "D":
+        return output + "001100"
+    elif comp == comp_letter:
+        return output + "110000"
+    elif comp == "!D":
+        return output + "001101"
+    elif comp == f"!{comp_letter}":
+        return output + "110001"
+    elif comp == "-D":
+        return output + "001111"
+    elif comp == f"-{comp_letter}":
+        return output + "110011"
+    elif comp == "D+1":
+        return output + "011111"
+    elif comp == f"{comp_letter}+1":
+        return output + "110111"
+    elif comp == "D-1":
+        return output + "001110"
+    elif comp == f"{comp_letter}-1":
+        return output + "110010"
+    elif comp == f"D+{comp_letter}":
+        return output + "000010"
+    elif comp == f"D-{comp_letter}":
+        return output + "010011"
+    elif comp == f"{comp_letter}-D":
+        return output + "000111"
+    elif comp == f"D&{comp_letter}":
+        return output + "000000"
+    else:
+        return output + "010101"
 
 
 def parseDest(dest):
@@ -96,6 +133,7 @@ def parseDest(dest):
     output += ("M" in dest)
 
     return output
+
 
 def parseJump(jump):
     if jump == "JMP":
@@ -114,6 +152,7 @@ def parseJump(jump):
         return "110"
     else:
         return "000"
+
 
 symbols = {"R0": 0,
            "R1": 1,
