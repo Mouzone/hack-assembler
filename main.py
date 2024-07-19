@@ -1,10 +1,12 @@
 import re
+import os
+
 
 # returns 16 bit binary
 def decimalToBinary(integer):
     output = ""
     while integer > 0:
-        output = integer % 2 + output
+        output = str(integer % 2) + output
         integer = integer // 2
 
     zeroes_to_add = 16 - len(output)
@@ -14,16 +16,16 @@ def decimalToBinary(integer):
 def cleanFile(file):
     lines = file.readlines()
     lines_no_whitespace = [line.strip() for line in lines]
-    lines_no_comments = [line for line in lines_no_whitespace if line[0] != "/" or line]
+    lines_no_comments = [line for line in lines_no_whitespace if line and line[0] != "/"]
     return lines_no_comments
 
 
-def readASMFile(file_name):
-    with open(f"./test_files/{file_name}") as file:
+def readASMFile(file_path, file_name):
+    with open(file_path) as file:
         file_cleaned = cleanFile(file)  # remove whitespace and comments
         file_no_labels = parseLabels(file_cleaned)  # remove and parse labels
         parseVariables(file_no_labels)  # parse variables
-        parseFile(file_no_labels)  # parse entirety of file
+        parseFile(file_no_labels, file_name)  # parse entirety of file
     return
 
 
@@ -48,16 +50,17 @@ def parseVariables(file):
             register += 1
 
 
-def parseFile(file):
+def parseFile(file_to_read, file_name):
     # write to output file
     # starts with @ write it as a_instruction "0 +..."
     # else write is as c_instruction "111 + a + cccccc + ddd + jjj
-    for line in file:
-        if line[0] == "@":
-            parseAInstruction(line)
-        else:
-            parseCInstruction(line)
-    return
+    file_name_cleaned = file_name.split(".")[0]
+    with open(f'./output_files/{file_name_cleaned}.hack', 'w') as file_to_write:
+        for line in file_to_read:
+            if line[0] == "@":
+                file_to_write.write(parseAInstruction(line))
+            else:
+                file_to_write.write(parseCInstruction(line))
 
 
 def parseAInstruction(line):
@@ -72,19 +75,24 @@ def parseCInstruction(line):
     output = "111"
     result = re.split(r'[=;]', line)
     a_comp = parseAandComp(result[0].strip())
-    dest = parseDest(result[1].strip())
-    jump = parseJump(result[2].strip())
+    output += a_comp
+    if len(result) == 2:
+        dest = parseDest(result[1].strip())
+        output += dest
+    if len(result) == 3:
+        jump = parseJump(result[2].strip())
+        output += jump
 
-    return output + a_comp + dest + jump
+    return output
 
 
 def parseAandComp(comp):
     output = ""
     if "M" in comp:
-        output += 1
+        output = "1"
         comp_letter = "M"
     else:
-        output += 0
+        output = "0"
         comp_letter = "A"
 
     if comp == "0":
@@ -128,9 +136,9 @@ def parseAandComp(comp):
 def parseDest(dest):
     output = ""
 
-    output += ("A" in dest)
-    output += ("D" in dest)
-    output += ("M" in dest)
+    output = output + str("A" in dest)
+    output = output + str("D" in dest)
+    output = output + str("M" in dest)
 
     return output
 
@@ -177,5 +185,8 @@ symbols = {"R0": 0,
            "ARG": 2,
            "THIS": 3,
            "THAT": 4}
-file_name = input("Enter filename")
-readASMFile(file_name)
+
+folder_path = "./test_files"
+for filename in os.listdir(folder_path):
+    file_path = os.path.join(folder_path, filename)
+    readASMFile(file_path, filename)
