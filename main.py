@@ -34,9 +34,10 @@ def parseLabels(file):
     line_number = 0
     for line in file:
         if line[0] == "(":
-            label = line[1:-1].lower()
-            symbols[label] = line_number + 1
-        line_number += 1
+            label = line[1:-1]
+            symbols[label] = line_number
+        else:
+            line_number += 1
 
     lines_no_labels = [line for line in file if line[0] != "("]
     return lines_no_labels
@@ -47,7 +48,6 @@ def parseVariables(file):
     register = 16
     for line in file:
         if line[0] == "@" and line[1:] not in symbols.keys() and not line[1:].isdigit():
-            print(line)
             symbols[line[1:]] = register
             register += 1
 
@@ -204,7 +204,7 @@ symbols = {"R0": 0,
            "R13": 13,
            "R14": 14,
            "R15": 15,
-           "Screen": 16384,
+           "SCREEN": 16384,
            "KBD": 24576,
            "SP": 0,
            "LCL": 1,
