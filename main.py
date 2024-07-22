@@ -34,7 +34,7 @@ def parseLabels(file):
     line_number = 0
     for line in file:
         if line[0] == "(":
-            label = line[1:-1]
+            label = line[1:-1].lower()
             symbols[label] = line_number + 1
         line_number += 1
 
@@ -46,7 +46,8 @@ def parseVariables(file):
     # starts at 16
     register = 16
     for line in file:
-        if line[0] == "@" and line[1:] not in symbols.keys():
+        if line[0] == "@" and line[1:] not in symbols.keys() and not line[1:].isdigit():
+            print(line)
             symbols[line[1:]] = register
             register += 1
 
@@ -67,8 +68,11 @@ def parseFile(file_to_read, file_name):
 
 def parseAInstruction(line):
     symbol = line[1:]
-    value = symbols[symbol]
-    output = decimalToBinary(value)
+    if symbol in symbols.keys():
+        value = symbols[symbol]
+        output = decimalToBinary(value)
+    else:
+        output = decimalToBinary(int(symbol))
     return output
 
 
@@ -76,15 +80,16 @@ def parseAInstruction(line):
 def parseCInstruction(line):
     output = "111"
     result = re.split(r'[=;]', line)
-    a_comp = parseAandComp(result[0].strip())
-    output += a_comp
-    if len(result) == 2:
-        dest = parseDest(result[1].strip())
-        output += dest
-    if len(result) == 3:
-        jump = parseJump(result[2].strip())
-        output += jump
 
+    jump = parseJump(result[1].strip())
+    if jump == "000":
+        dest = parseDest(result[0])
+        comp = parseAandComp(result[1])
+        output = output + comp + dest
+    else:
+        comp = parseAandComp(result[0])
+        output = output + comp + "000"
+    output += jump
     return output
 
 
@@ -136,8 +141,6 @@ def parseAandComp(comp):
 
 
 def parseDest(dest):
-    output = ""
-
     if "A" in dest:
         output = "1"
     else:
