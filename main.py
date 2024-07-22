@@ -1,5 +1,6 @@
 import re
 import os
+import glob
 
 
 # returns 16 bit binary
@@ -61,6 +62,7 @@ def parseFile(file_to_read, file_name):
                 file_to_write.write(parseAInstruction(line))
             else:
                 file_to_write.write(parseCInstruction(line))
+            file_to_write.write("\n")
 
 
 def parseAInstruction(line):
@@ -136,9 +138,20 @@ def parseAandComp(comp):
 def parseDest(dest):
     output = ""
 
-    output = output + str("A" in dest)
-    output = output + str("D" in dest)
-    output = output + str("M" in dest)
+    if "A" in dest:
+        output = "1"
+    else:
+        output = "0"
+
+    if "D" in dest:
+        output += "1"
+    else:
+        output += "0"
+
+    if "M" in dest:
+        output += "1"
+    else:
+        output += "0"
 
     return output
 
@@ -160,6 +173,16 @@ def parseJump(jump):
         return "110"
     else:
         return "000"
+
+
+def cleanFolder(file_path):
+    files = glob.glob(os.path.join(file_path, '*'))
+    for file in files:
+        try:
+            os.remove(file)
+            print(f'Successfully deleted {file}')
+        except Exception as e:
+            print(f'Error deleting {file}: {e}')
 
 
 symbols = {"R0": 0,
@@ -186,7 +209,14 @@ symbols = {"R0": 0,
            "THIS": 3,
            "THAT": 4}
 
-folder_path = "./test_files"
-for filename in os.listdir(folder_path):
-    file_path = os.path.join(folder_path, filename)
-    readASMFile(file_path, filename)
+
+def run():
+    input_path = "./test_files"
+    output_path = "./output_files"
+    cleanFolder(output_path)
+    for filename in os.listdir(input_path):
+        file_path = os.path.join(input_path, filename)
+        readASMFile(file_path, filename)
+
+
+run()
